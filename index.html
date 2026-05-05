@@ -83,6 +83,47 @@
       margin: 0 auto;
     }
 
+    /* ── Barra de progreso ── */
+    .progress-bar-wrap {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--paper);
+      border-bottom: 1px solid var(--border-light);
+      padding: 0.6rem 2rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .progress-track {
+      flex: 1;
+      height: 4px;
+      background: var(--border-light);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--accent);
+      border-radius: 2px;
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    .progress-label {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--ink-faint);
+      white-space: nowrap;
+      min-width: 6rem;
+      text-align: right;
+    }
+
     /* ── Main layout ── */
     main {
       max-width: 720px;
@@ -219,6 +260,21 @@
 
     .opt span { color: var(--ink-light); }
 
+    .opt-letter {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      color: var(--ink-faint);
+      text-transform: uppercase;
+      flex-shrink: 0;
+      min-width: 1.1rem;
+      padding-top: 2px;
+    }
+
+    .opt.correct .opt-letter { color: var(--correct); }
+    .opt.wrong .opt-letter   { color: var(--wrong); }
+
     /* Estados tras corrección */
     .opt.correct {
       background: var(--correct-bg);
@@ -337,6 +393,13 @@
   <div class="header-rule"></div>
 </header>
 
+<div class="progress-bar-wrap" id="progress-bar-wrap">
+  <div class="progress-track">
+    <div class="progress-fill" id="progress-fill"></div>
+  </div>
+  <span class="progress-label" id="progress-label">0 de 40</span>
+</div>
+
 <main>
 
   <div class="datos-section">
@@ -418,7 +481,21 @@ const questions = [
   { q: "¿Qué denuncia histórica concreta pretende hacer Ruta Sepetys con esta novela?", opts: ["Los crímenes de guerra nazis en el frente oriental", "El Holocausto y la persecución judía en Europa", "Las deportaciones masivas estalinistas de los pueblos bálticos, silenciadas durante décadas", "La colaboración de los países occidentales con Stalin durante la Guerra Fría"], ans: 2 }
 ];
 
+const LETTERS = ['A', 'B', 'C', 'D'];
+
 const quiz = document.getElementById('quiz');
+const progressFill = document.getElementById('progress-fill');
+const progressLabel = document.getElementById('progress-label');
+
+function updateProgress() {
+  let answered = 0;
+  questions.forEach((_, i) => {
+    if (document.querySelector(`input[name="q${i}"]:checked`)) answered++;
+  });
+  const pct = Math.round((answered / questions.length) * 100);
+  progressFill.style.width = pct + '%';
+  progressLabel.textContent = answered + ' de ' + questions.length;
+}
 
 questions.forEach((q, i) => {
   const block = document.createElement('div');
@@ -427,6 +504,7 @@ questions.forEach((q, i) => {
   const optsHtml = q.opts.map((o, j) => `
     <label class="opt" id="opt-${i}-${j}">
       <input type="radio" name="q${i}" value="${j}">
+      <span class="opt-letter">${LETTERS[j]}</span>
       <span>${o}</span>
     </label>`).join('');
   block.innerHTML = `
@@ -437,6 +515,10 @@ questions.forEach((q, i) => {
     <div class="opts">${optsHtml}</div>`;
   quiz.appendChild(block);
 });
+
+// Actualizar barra al marcar respuestas
+quiz.addEventListener('change', updateProgress);
+updateProgress();
 
 document.getElementById('btn-submit').addEventListener('click', async () => {
   // Validar datos del alumno
@@ -457,10 +539,17 @@ document.getElementById('btn-submit').addEventListener('click', async () => {
   // Validar que todas las preguntas estén respondidas
   let unanswered = [];
   questions.forEach((_, i) => {
-    if (!document.querySelector(`input[name="q${i}"]:checked`)) unanswered.push(i + 1);
+    if (!document.querySelector(`input[name="q${i}"]:checked`)) unanswered.push(i);
   });
   if (unanswered.length > 0) {
-    alert(`Faltan por responder las preguntas: ${unanswered.join(', ')}.`);
+    const firstBlock = document.getElementById('q' + unanswered[0]);
+    firstBlock.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    firstBlock.style.borderColor = 'var(--accent)';
+    firstBlock.style.boxShadow = '0 0 0 2px rgba(122,62,42,0.15)';
+    setTimeout(() => {
+      firstBlock.style.borderColor = '';
+      firstBlock.style.boxShadow = '';
+    }, 2000);
     return;
   }
 
@@ -503,9 +592,11 @@ document.getElementById('btn-submit').addEventListener('click', async () => {
       // Ocultar formulario y mostrar mensaje
       document.querySelector('.datos-section').style.display = 'none';
       document.querySelector('.divider').style.display = 'none';
+      document.getElementById('progress-bar-wrap').style.display = 'none';
       quiz.style.display = 'none';
       document.querySelector('.submit-wrap').style.display = 'none';
       document.getElementById('thankyou').style.display = 'block';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     } else {
       throw new Error('Error en el envío');
     }
