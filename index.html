@@ -1,611 +1,217 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Control de lectura — Entre tonos de gris</title>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Control de lectura</title>
 
-    :root {
-      --cream: #f7f4ef;
-      --paper: #fdfcf9;
-      --ink: #1a1814;
-      --ink-light: #4a4540;
-      --ink-faint: #8a847c;
-      --border: #d8d0c4;
-      --border-light: #ece6dc;
-      --accent: #7a3e2a;
-      --accent-light: #f2ebe3;
-      --correct: #2d5a27;
-      --correct-bg: #edf4ec;
-      --wrong: #7a2020;
-      --wrong-bg: #f7eeee;
-    }
+<style>
+body {
+  font-family: sans-serif;
+  -webkit-user-select: none;
+  user-select: none;
+}
+input { user-select: text; }
 
-    html { font-size: 16px; scroll-behavior: smooth; }
-
-    body {
-      background-color: var(--cream);
-      color: var(--ink);
-      font-family: 'EB Garamond', Georgia, serif;
-      font-size: 1.05rem;
-      line-height: 1.7;
-      min-height: 100vh;
-    }
-
-    /* ── Header ── */
-    header {
-      text-align: center;
-      padding: 4rem 2rem 3rem;
-      border-bottom: 1px solid var(--border);
-      background: var(--paper);
-    }
-
-    .header-label {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 0.75rem;
-      font-weight: 500;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: var(--ink-faint);
-      margin-bottom: 1.2rem;
-    }
-
-    header h1 {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: clamp(2rem, 5vw, 3rem);
-      font-weight: 300;
-      line-height: 1.2;
-      color: var(--ink);
-      margin-bottom: 0.4rem;
-    }
-
-    header h1 em {
-      font-style: italic;
-      font-weight: 300;
-    }
-
-    .header-author {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 1rem;
-      font-weight: 400;
-      font-style: italic;
-      color: var(--ink-faint);
-      margin-bottom: 1.5rem;
-    }
-
-    .header-rule {
-      width: 48px;
-      height: 1px;
-      background: var(--accent);
-      margin: 0 auto;
-    }
-
-    /* ── Barra de progreso ── */
-    .progress-bar-wrap {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      background: var(--paper);
-      border-bottom: 1px solid var(--border-light);
-      padding: 0.6rem 2rem;
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-    }
-
-    .progress-track {
-      flex: 1;
-      height: 4px;
-      background: var(--border-light);
-      border-radius: 2px;
-      overflow: hidden;
-    }
-
-    .progress-fill {
-      height: 100%;
-      background: var(--accent);
-      border-radius: 2px;
-      width: 0%;
-      transition: width 0.3s ease;
-    }
-
-    .progress-label {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 0.7rem;
-      font-weight: 600;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--ink-faint);
-      white-space: nowrap;
-      min-width: 6rem;
-      text-align: right;
-    }
-
-    /* ── Main layout ── */
-    main {
-      max-width: 720px;
-      margin: 0 auto;
-      padding: 3rem 2rem 5rem;
-    }
-
-    /* ── Datos del alumno ── */
-    .datos-section {
-      background: var(--paper);
-      border: 1px solid var(--border);
-      border-radius: 2px;
-      padding: 2rem 2.25rem;
-      margin-bottom: 3rem;
-    }
-
-    .section-title {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 0.7rem;
-      font-weight: 600;
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
-      color: var(--ink-faint);
-      margin-bottom: 1.5rem;
-      padding-bottom: 0.75rem;
-      border-bottom: 1px solid var(--border-light);
-    }
-
-    .form-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1.25rem;
-    }
-
-    .form-grid .full { grid-column: 1 / -1; }
-
-    .field label {
-      display: block;
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 0.72rem;
-      font-weight: 500;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: var(--ink-faint);
-      margin-bottom: 0.4rem;
-    }
-
-    .field input {
-      width: 100%;
-      padding: 0.65rem 0.85rem;
-      background: var(--cream);
-      border: 1px solid var(--border);
-      border-radius: 1px;
-      font-family: 'EB Garamond', Georgia, serif;
-      font-size: 16px; /* Evita el zoom automático en iOS/iPadOS */
-      color: var(--ink);
-      outline: none;
-      transition: border-color 0.2s;
-    }
-
-    .field input:focus {
-      border-color: var(--accent);
-      background: var(--paper);
-    }
-
-    /* ── Preguntas ── */
-    .q-block {
-      background: var(--paper);
-      border: 1px solid var(--border);
-      border-radius: 2px;
-      padding: 1.75rem 2.25rem;
-      margin-bottom: 1.25rem;
-      transition: border-color 0.2s;
-    }
-
-    .q-block:hover { border-color: #c0b8ae; }
-
-    .q-header {
-      display: flex;
-      align-items: baseline;
-      gap: 0.75rem;
-      margin-bottom: 1rem;
-    }
-
-    .q-num {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 0.7rem;
-      font-weight: 600;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      color: var(--ink-faint);
-      white-space: nowrap;
-      padding-top: 2px;
-    }
-
-    .q-text {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 1.2rem;
-      font-weight: 500;
-      line-height: 1.4;
-      color: var(--ink);
-    }
-
-    .opts {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-      padding-left: 1.5rem;
-    }
-
-    .opt {
-      display: flex;
-      align-items: flex-start;
-      gap: 0.75rem;
-      padding: 0.8rem 1rem;
-      border: 1px solid transparent;
-      border-radius: 1px;
-      cursor: pointer;
-      transition: background 0.15s, border-color 0.15s;
-      font-size: 1rem;
-      line-height: 1.5;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    .opt:hover { background: var(--accent-light); border-color: var(--border-light); }
-
-    .opt input[type="radio"] {
-      margin-top: 3px;
-      flex-shrink: 0;
-      accent-color: var(--accent);
-      width: 18px;
-      height: 18px;
-    }
-
-    .opt span { color: var(--ink-light); }
-
-    .opt-letter {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 0.78rem;
-      font-weight: 600;
-      letter-spacing: 0.08em;
-      color: var(--ink-faint);
-      text-transform: uppercase;
-      flex-shrink: 0;
-      min-width: 1.1rem;
-      padding-top: 2px;
-    }
-
-    .opt.correct .opt-letter { color: var(--correct); }
-    .opt.wrong .opt-letter   { color: var(--wrong); }
-
-    /* Estados tras corrección */
-    .opt.correct {
-      background: var(--correct-bg);
-      border-color: #b5d4b2;
-    }
-    .opt.correct span { color: var(--correct); font-weight: 500; }
-
-    .opt.wrong {
-      background: var(--wrong-bg);
-      border-color: #e0baba;
-    }
-    .opt.wrong span { color: var(--wrong); }
-
-    .opt.correct::after {
-      content: '✓';
-      margin-left: auto;
-      color: var(--correct);
-      font-weight: 600;
-      font-size: 0.9rem;
-      flex-shrink: 0;
-    }
-    .opt.wrong::after {
-      content: '✗';
-      margin-left: auto;
-      color: var(--wrong);
-      font-size: 0.9rem;
-      flex-shrink: 0;
-    }
-
-    .q-block.answered { pointer-events: none; }
-
-    /* ── Botón enviar ── */
-    .submit-wrap {
-      text-align: center;
-      margin-top: 2.5rem;
-    }
-
-    .btn-submit {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 0.8rem;
-      font-weight: 600;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: var(--paper);
-      background: var(--ink);
-      border: none;
-      padding: 0.9rem 3rem;
-      border-radius: 1px;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-
-    .btn-submit:hover { background: var(--accent); }
-    .btn-submit:disabled { background: var(--ink-faint); cursor: not-allowed; }
-
-    .submit-note {
-      margin-top: 1rem;
-      font-size: 0.88rem;
-      color: var(--ink-faint);
-      font-style: italic;
-    }
-
-    /* ── Mensaje final ── */
-    .thankyou {
-      display: none;
-      text-align: center;
-      padding: 3rem 2rem;
-      background: var(--paper);
-      border: 1px solid var(--border);
-      border-radius: 2px;
-      margin-top: 2rem;
-    }
-
-    .thankyou-icon {
-      font-size: 2rem;
-      margin-bottom: 1rem;
-    }
-
-    .thankyou h2 {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 1.8rem;
-      font-weight: 300;
-      margin-bottom: 0.5rem;
-    }
-
-    .thankyou p {
-      color: var(--ink-faint);
-      font-style: italic;
-    }
-
-    /* ── Divisor ── */
-    .divider {
-      text-align: center;
-      margin: 2.5rem 0;
-      color: var(--border);
-      letter-spacing: 0.4em;
-      font-size: 0.8rem;
-    }
-
-    @media (max-width: 640px) {
-      main { padding: 2rem 1.25rem 4rem; }
-      .form-grid { grid-template-columns: 1fr; }
-      .form-grid .full { grid-column: 1; }
-      .datos-section, .q-block { padding: 1.25rem 1.25rem; }
-      .opts { padding-left: 0; }
-      header { padding: 2.5rem 1.25rem 2rem; }
-    }
-  </style>
+#timer {
+  position: fixed;
+  top: 10px;
+  right: 20px;
+  font-size: 18px;
+  font-weight: bold;
+}
+</style>
 </head>
+
 <body>
 
-<header>
-  <p class="header-label">Historia del Mundo Contemporáneo · 1.º Bachillerato</p>
-  <h1>Control de lectura<br><em>Entre tonos de gris</em></h1>
-  <p class="header-author">Ruta Sepetys</p>
-  <div class="header-rule"></div>
-</header>
+<div id="timer">25:00</div>
 
-<div class="progress-bar-wrap" id="progress-bar-wrap">
-  <div class="progress-track">
-    <div class="progress-fill" id="progress-fill"></div>
-  </div>
-  <span class="progress-label" id="progress-label">0 de 40</span>
-</div>
+<h2>Nombre</h2>
+<input id="nombre">
+<h2>Email</h2>
+<input id="email">
 
-<main>
+<div id="quiz"></div>
 
-  <div class="datos-section">
-    <p class="section-title">Datos del alumno</p>
-    <div class="form-grid">
-      <div class="field">
-        <label for="nombre">Nombre</label>
-        <input type="text" id="nombre" placeholder="Tu nombre" required>
-      </div>
-      <div class="field">
-        <label for="apellidos">Apellidos</label>
-        <input type="text" id="apellidos" placeholder="Tus apellidos" required>
-      </div>
-      <div class="field full">
-        <label for="email">Correo electrónico</label>
-        <input type="email" id="email" placeholder="correo@ejemplo.com" required>
-      </div>
-    </div>
-  </div>
-
-  <div class="divider">· · ·</div>
-
-  <div id="quiz"></div>
-
-  <div class="submit-wrap">
-    <button class="btn-submit" id="btn-submit">Enviar respuestas</button>
-    <p class="submit-note">Asegúrate de haber respondido las 40 preguntas antes de enviar.</p>
-  </div>
-
-  <div class="thankyou" id="thankyou">
-    <div class="thankyou-icon">✦</div>
-    <h2>Respuestas enviadas</h2>
-    <p>Tu control ha sido registrado correctamente. Gracias.</p>
-  </div>
-
-</main>
+<button id="btn-submit">Enviar</button>
 
 <script>
+// =======================
+// CONFIGURACIÓN SEGURIDAD
+// =======================
+document.addEventListener('contextmenu', e => e.preventDefault());
+document.addEventListener('touchstart', e => {
+  if (e.touches.length > 1) e.preventDefault();
+}, { passive: false });
+
+history.pushState(null, null, location.href);
+window.onpopstate = () => history.go(1);
+
+// =======================
+// TIEMPO
+// =======================
+const startTime = new Date();
+let timeLeft = 25 * 60;
+let tabSwitches = [];
+
+function startTimer() {
+  const el = document.getElementById('timer');
+
+  setInterval(() => {
+    timeLeft--;
+    const m = Math.floor(timeLeft / 60);
+    const s = timeLeft % 60;
+    el.textContent = `${m}:${s.toString().padStart(2,'0')}`;
+
+    if (timeLeft <= 0) {
+      alert("Tiempo terminado");
+      document.getElementById('btn-submit').click();
+    }
+  }, 1000);
+}
+startTimer();
+
+// =======================
+// CAMBIO DE PESTAÑA
+// =======================
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) {
+    tabSwitches.push(new Date().toLocaleString());
+    saveProgress();
+  }
+});
+
+// =======================
+// PREGUNTAS
+// =======================
 const questions = [
-  { q: "¿En qué país vive Lina Vilkas al comienzo de la novela?", opts: ["Polonia", "Letonia", "Lituania", "Estonia"], ans: 2 },
-  { q: "¿Cuántos años tiene Lina cuando comienza la historia?", opts: ["14 años", "15 años", "16 años", "17 años"], ans: 2 },
-  { q: "¿Cuál es la ocupación del padre de Lina?", opts: ["Médico", "Rector de universidad", "Militar", "Comerciante"], ans: 1 },
-  { q: "¿Qué talento especial posee Lina y que juega un papel importante en la novela?", opts: ["Toca el piano", "Habla varios idiomas", "Dibuja y pinta", "Escribe poesía"], ans: 2 },
-  { q: "¿Quién llega a detener a la familia Vilkas en plena noche?", opts: ["Soldados nazis", "Agentes del NKVD soviético", "Policías lituanos", "Milicias locales"], ans: 1 },
-  { q: "¿Cómo se llama el hermano menor de Lina?", opts: ["Jonas", "Andrius", "Aleksas", "Petras"], ans: 0 },
-  { q: "¿A qué artista admira especialmente Lina y cuya obra intenta emular?", opts: ["Picasso", "Edvard Munch", "Vincent van Gogh", "Salvador Dalí"], ans: 2 },
-  { q: "¿En qué tipo de transporte son trasladados los deportados durante la mayor parte del viaje?", opts: ["Camiones militares", "Vagones de ganado del tren", "Barcos de carga", "Autobuses requisados"], ans: 1 },
-  { q: "¿Cómo se llama el joven lituano del que Lina se va enamorando a lo largo de la novela?", opts: ["Jonas", "Aleksas", "Andrius", "Petras"], ans: 2 },
-  { q: "¿Qué sucede con el padre de Lina tras la detención familiar?", opts: ["Escapa a Suecia", "Es enviado a una prisión diferente, separado de ellos", "Muere en el trayecto", "Es liberado por los soviéticos"], ans: 1 },
-  { q: "¿Cuál es la primera gran colonia en la que trabajan Lina y su familia al llegar a Siberia?", opts: ["Una mina de carbón", "Una granja de remolacha azucarera", "Una fábrica de madera", "Un campo de trabajo cerca de Altái"], ans: 1 },
-  { q: "¿Qué enfermedad amenaza gravemente la vida del hermano de Lina durante el deportamiento?", opts: ["Tuberculosis", "Tifus", "Escorbuto", "Neumonía"], ans: 0 },
-  { q: "¿Cuál es el papel del personaje conocido como el guardián soviético joven?", opts: ["Es el villano principal que tortura a los prisioneros", "Muestra cierta ambigüedad moral y en ocasiones ayuda a los deportados", "Es el comandante del campo", "Es un prisionero político como Lina"], ans: 1 },
-  { q: "¿Por qué los dibujos que hace Lina tienen tanta importancia estratégica en la novela?", opts: ["Valen dinero para comprar comida", "Son un medio para enviar mensajes ocultos y documentar lo ocurrido", "Le permiten ganarse el favor de los guardias", "Sirven como prueba de su inocencia ante el NKVD"], ans: 1 },
-  { q: "¿Hacia dónde son trasladados finalmente Lina y los demás deportados en la parte final de la novela?", opts: ["Un campo cerca del mar Caspio", "El Ártico, en la península de Yamal", "Las estepas de Kazajistán", "Siberia central, cerca del lago Baikal"], ans: 1 },
-  { q: "¿Qué objeto entierra Lina en el suelo ártico con la esperanza de que algún día sea encontrado?", opts: ["Una carta dirigida a su padre", "Una caja con dibujos y un diario que documenta el deportamiento", "El retrato de su familia", "Un libro de poemas lituanos"], ans: 1 },
-  { q: "¿Cómo se llama la madre de Lina?", opts: ["Elena", "Ona", "Marta", "Rasa"], ans: 0 },
-  { q: "¿Qué año describe el epílogo como el momento en que Lina puede finalmente contar su historia públicamente?", opts: ["1953, tras la muerte de Stalin", "1972", "1989, con la caída del telón de acero", "1991, con la independencia de Lituania"], ans: 3 },
-  { q: "¿Cuál es el tema central que articula toda la novela?", opts: ["La Segunda Guerra Mundial vista desde el frente alemán", "Las deportaciones estalinistas de los pueblos bálticos y la resistencia de la memoria", "La colaboración de los países bálticos con la Alemania nazi", "La vida cotidiana en la Unión Soviética durante los años 40"], ans: 1 },
-  { q: "¿Qué idea resume mejor el mensaje final de la novela?", opts: ["La violencia siempre triunfa sobre la bondad", "Recordar y testimoniar es una forma de resistencia y de supervivencia", "Solo la huida individual garantiza la salvación", "La historia la escriben los vencedores y no puede cambiarse"], ans: 1 },
-  { q: "¿En qué mes y año se produce la deportación de la familia Vilkas?", opts: ["Junio de 1941", "Septiembre de 1939", "Marzo de 1943", "Enero de 1945"], ans: 0 },
-  { q: "¿Qué le ocurre a la señora Rimas durante el trayecto en tren?", opts: ["Intenta escapar y es fusilada", "Da a luz a un bebé en el vagón", "Muere de deshidratación", "Es separada del grupo por los guardias"], ans: 1 },
-  { q: "¿Cómo consigue Jonas mejorar su estado de salud en el campo?", opts: ["Gracias a medicamentos robados", "Porque Andrius consigue comida extra para él", "Un médico prisionero lo trata en secreto", "Su madre le cede sus propias raciones"], ans: 1 },
-  { q: "¿Qué relación tiene Andrius con los guardias soviéticos que le otorga ciertos privilegios?", opts: ["Su padre era un oficial del Ejército Rojo", "Su madre colabora con el comandante del campo", "Habla ruso con fluidez y actúa de intérprete", "Es ciudadano soviético por matrimonio"], ans: 1 },
-  { q: "¿Cuál es la actitud de la madre de Lina, Elena, a lo largo de toda la novela?", opts: ["Se muestra abatida y pasiva ante la situación", "Mantiene la dignidad y cuida de los demás incluso en las peores condiciones", "Culpa a su marido de lo ocurrido", "Intenta negociar con los soviéticos la liberación de la familia"], ans: 1 },
-  { q: "¿Qué significado tienen para Lina los dibujos que hacía de niña inspirándose en Munch?", opts: ["Eran encargos que su padre vendía para ganar dinero", "Representaban su deseo de huir de Lituania", "Eran una forma de expresar emociones que no podía verbalizar", "Los hacía por obligación escolar"], ans: 2 },
-  { q: "¿Cómo describe Lina el olor y las condiciones dentro del vagón de tren?", opts: ["Frío extremo pero soportable gracias a las mantas", "Hacinamiento, calor, falta de agua y condiciones infrahumanas", "Oscuridad total durante todo el trayecto", "Los soviéticos les proporcionaban comida caliente cada día"], ans: 1 },
-  { q: "¿Qué hace Lina con los dibujos para intentar localizar a su padre?", opts: ["Los esconde bajo las tablas del suelo del vagón", "Los entrega directamente a un guardia de confianza", "Los oculta en la ropa de otras deportadas que van a otro destino, con mensajes codificados", "Los destruye para que no los encuentren los guardias"], ans: 2 },
-  { q: "¿Qué nación ocupó Lituania justo antes de las deportaciones de 1941?", opts: ["Alemania nazi", "La Unión Soviética", "Polonia", "Finlandia"], ans: 1 },
-  { q: "¿Cómo se llama el oficial soviético que dirige el campo y que resulta especialmente cruel?", opts: ["Komorov", "Kretzsky", "Ivanov", "Stalin"], ans: 0 },
-  { q: "¿Qué papel juega la escritura y el diario en la novela, además de los dibujos?", opts: ["Lina escribe cartas de amor a Andrius que nunca envía", "El diario es el propio relato que el lector está leyendo, narrado desde el futuro", "Jonas lleva un diario secreto que da pistas sobre el paradero del padre", "Elena escribe un diario que Lina descubre al final"], ans: 1 },
-  { q: "¿Por qué el título 'Entre tonos de gris' tiene un sentido simbólico en la novela?", opts: ["Hace referencia al paisaje invernal de Siberia", "Alude a la paleta de colores que usa Lina en sus dibujos", "Simboliza que no todo es blanco o negro: hay bondad y maldad en ambos lados", "Es el título de un cuadro de Van Gogh que admira Lina"], ans: 2 },
-  { q: "¿Qué le pide Andrius a Lina antes de que los separen definitivamente?", opts: ["Que lo espere y no olvide su nombre", "Que destruya los dibujos para protegerse", "Que cuide de Jonas si él no sobrevive", "Que intente escapar hacia Finlandia"], ans: 0 },
-  { q: "¿Cómo reacciona Lina cuando descubre que su padre sigue vivo en otra prisión?", opts: ["Decide escapar para buscarlo", "Siente esperanza renovada y redobla su voluntad de sobrevivir", "Cae en una profunda depresión", "No lo cree y piensa que es propaganda soviética"], ans: 1 },
-  { q: "¿Qué instrumento utilizan los deportados lituanos para mantener viva su identidad cultural en el campo?", opts: ["Celebran misas clandestinas", "Cantan canciones tradicionales lituanas en secreto", "Leen libros en lituano que esconden de los guardias", "Organizan clases de historia de Lituania para los niños"], ans: 1 },
-  { q: "¿En qué condiciones trabajan los deportados en el campo de Siberia?", opts: ["Trabajo administrativo en oficinas soviéticas", "Labores agrícolas forzadas con raciones mínimas de comida", "Construcción de infraestructuras ferroviarias", "Trabajo en fábricas de armamento"], ans: 1 },
-  { q: "¿Qué le sucede al bebé nacido en el tren durante la historia?", opts: ["Sobrevive y se convierte en símbolo de esperanza para el grupo", "Muere poco después de nacer por las condiciones del viaje", "Es entregado a una familia soviética", "No se menciona su destino"], ans: 1 },
-  { q: "¿Cuál es la postura de Lina respecto al odio hacia los soviéticos a lo largo de la novela?", opts: ["Odia a todos los soviéticos sin distinción hasta el final", "Aprende a distinguir entre el sistema criminal y los individuos, algunos de los cuales muestran humanidad", "Perdona a sus captores por influencia religiosa", "Nunca reflexiona sobre ello, solo piensa en sobrevivir"], ans: 1 },
-  { q: "¿Qué recurso narrativo usa Ruta Sepetys para dar contexto histórico al relato?", opts: ["Notas a pie de página con datos históricos", "Un prólogo y un epílogo que enmarcan la historia en la realidad documentada", "Capítulos alternos narrados desde el punto de vista soviético", "Un mapa detallado de las rutas de deportación"], ans: 1 },
-  { q: "¿Qué denuncia histórica concreta pretende hacer Ruta Sepetys con esta novela?", opts: ["Los crímenes de guerra nazis en el frente oriental", "El Holocausto y la persecución judía en Europa", "Las deportaciones masivas estalinistas de los pueblos bálticos, silenciadas durante décadas", "La colaboración de los países occidentales con Stalin durante la Guerra Fría"], ans: 2 }
+  { q: "Capital de Francia", opts: ["Madrid","París","Roma","Berlín"], ans: 1 },
+  { q: "2 + 2", opts: ["3","4","5","6"], ans: 1 }
 ];
 
-const LETTERS = ['A', 'B', 'C', 'D'];
-
-const quiz = document.getElementById('quiz');
-const progressFill = document.getElementById('progress-fill');
-const progressLabel = document.getElementById('progress-label');
-
-function updateProgress() {
-  let answered = 0;
-  questions.forEach((_, i) => {
-    if (document.querySelector(`input[name="q${i}"]:checked`)) answered++;
-  });
-  const pct = Math.round((answered / questions.length) * 100);
-  progressFill.style.width = pct + '%';
-  progressLabel.textContent = answered + ' de ' + questions.length;
+// shuffle
+function shuffle(a){
+  for(let i=a.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
 }
 
-questions.forEach((q, i) => {
-  const block = document.createElement('div');
-  block.className = 'q-block';
-  block.id = 'q' + i;
-  const optsHtml = q.opts.map((o, j) => `
-    <label class="opt" id="opt-${i}-${j}">
-      <input type="radio" name="q${i}" value="${j}">
-      <span class="opt-letter">${LETTERS[j]}</span>
-      <span>${o}</span>
-    </label>`).join('');
-  block.innerHTML = `
-    <div class="q-header">
-      <span class="q-num">Pregunta ${i + 1}</span>
-      <p class="q-text">${q.q}</p>
-    </div>
-    <div class="opts">${optsHtml}</div>`;
-  quiz.appendChild(block);
+// aleatorizar
+shuffle(questions);
+questions.forEach(q=>{
+  const mix = q.opts.map((o,i)=>({o,correct:i===q.ans}));
+  shuffle(mix);
+  q.opts = mix.map(x=>x.o);
+  q.ans = mix.findIndex(x=>x.correct);
 });
 
-// Actualizar barra al marcar respuestas
-quiz.addEventListener('change', updateProgress);
-updateProgress();
+// =======================
+// RENDER
+// =======================
+const quiz = document.getElementById('quiz');
 
-document.getElementById('btn-submit').addEventListener('click', async () => {
-  // Validar datos del alumno
-  const nombre = document.getElementById('nombre').value.trim();
-  const apellidos = document.getElementById('apellidos').value.trim();
-  const email = document.getElementById('email').value.trim();
+questions.forEach((q,i)=>{
+  const div = document.createElement('div');
+  div.innerHTML = `<p>${q.q}</p>` +
+    q.opts.map((o,j)=>
+      `<label><input type="radio" name="q${i}" value="${j}">${o}</label><br>`
+    ).join('');
+  quiz.appendChild(div);
+});
 
-  if (!nombre || !apellidos || !email) {
-    alert('Por favor, rellena tu nombre, apellidos y correo electrónico antes de enviar.');
-    return;
-  }
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(email)) {
-    alert('Por favor, introduce un correo electrónico válido.');
-    return;
-  }
-
-  // Validar que todas las preguntas estén respondidas
-  let unanswered = [];
-  questions.forEach((_, i) => {
-    if (!document.querySelector(`input[name="q${i}"]:checked`)) unanswered.push(i);
+// =======================
+// AUTOGUARDADO
+// =======================
+function getAnswers() {
+  const answers = {};
+  questions.forEach((q,i)=>{
+    const r = document.querySelector(`input[name=q${i}]:checked`);
+    if(r) answers[i] = r.value;
   });
-  if (unanswered.length > 0) {
-    const firstBlock = document.getElementById('q' + unanswered[0]);
-    firstBlock.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    firstBlock.style.borderColor = 'var(--accent)';
-    firstBlock.style.boxShadow = '0 0 0 2px rgba(122,62,42,0.15)';
-    setTimeout(() => {
-      firstBlock.style.borderColor = '';
-      firstBlock.style.boxShadow = '';
-    }, 2000);
-    return;
-  }
+  return answers;
+}
 
-  // Corregir y construir el resumen
-  let score = 0;
-  let resumenLineas = [];
+function saveProgress() {
+  const data = {
+    nombre: document.getElementById('nombre').value,
+    email: document.getElementById('email').value,
+    answers: getAnswers(),
+    timeLeft,
+    tabSwitches
+  };
+  localStorage.setItem("examProgress", JSON.stringify(data));
+}
 
-  questions.forEach((q, i) => {
-    const chosen = parseInt(document.querySelector(`input[name="q${i}"]:checked`).value);
-    const esCorrecta = chosen === q.ans;
-    if (esCorrecta) score++;
-    const marca = esCorrecta ? '✓ CORRECTO' : '✗ INCORRECTO';
-    resumenLineas.push(`P${i + 1}. ${q.q}\n   Respuesta: ${q.opts[chosen]} — ${marca}${!esCorrecta ? ` (Correcta: ${q.opts[q.ans]})` : ''}`);
-  });
+// guardar cada 10 segundos
+setInterval(saveProgress, 10000);
 
-  const nota = ((score / questions.length) * 10).toFixed(1);
-  const resumenTexto = resumenLineas.join('\n\n');
+// guardar al responder
+quiz.addEventListener('change', saveProgress);
+document.getElementById('nombre').addEventListener('input', saveProgress);
+document.getElementById('email').addEventListener('input', saveProgress);
 
-  // Enviar a Formspree
-  const btn = document.getElementById('btn-submit');
-  btn.disabled = true;
-  btn.textContent = 'Enviando…';
+// =======================
+// RECUPERAR PROGRESO
+// =======================
+function loadProgress() {
+  const saved = localStorage.getItem("examProgress");
+  if(!saved) return;
 
-  try {
-    const payload = {
-      nombre,
-      apellidos,
-      email,
-      nota: `${nota} / 10 (${score} de ${questions.length} correctas)`,
-      respuestas: resumenTexto
-    };
+  const data = JSON.parse(saved);
 
-    const res = await fetch('https://formspree.io/f/xaqvoaqj', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-      body: JSON.stringify(payload)
+  document.getElementById('nombre').value = data.nombre || "";
+  document.getElementById('email').value = data.email || "";
+
+  if(data.timeLeft) timeLeft = data.timeLeft;
+  if(data.tabSwitches) tabSwitches = data.tabSwitches;
+
+  if(data.answers){
+    Object.entries(data.answers).forEach(([i,val])=>{
+      const input = document.querySelector(`input[name=q${i}][value="${val}"]`);
+      if(input) input.checked = true;
     });
-
-    if (res.ok) {
-      // Ocultar formulario y mostrar mensaje
-      document.querySelector('.datos-section').style.display = 'none';
-      document.querySelector('.divider').style.display = 'none';
-      document.getElementById('progress-bar-wrap').style.display = 'none';
-      quiz.style.display = 'none';
-      document.querySelector('.submit-wrap').style.display = 'none';
-      document.getElementById('thankyou').style.display = 'block';
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    } else {
-      throw new Error('Error en el envío');
-    }
-  } catch (e) {
-    btn.disabled = false;
-    btn.textContent = 'Enviar respuestas';
-    alert('Ha habido un problema al enviar el formulario. Por favor, inténtalo de nuevo.');
   }
-});
+}
+
+loadProgress();
+
+// =======================
+// ENVÍO
+// =======================
+document.getElementById('btn-submit').onclick = async () => {
+
+  const nombre = document.getElementById('nombre').value;
+  const email = document.getElementById('email').value;
+
+  const endTime = new Date();
+
+  let score = 0;
+  questions.forEach((q,i)=>{
+    const r = document.querySelector(`input[name=q${i}]:checked`);
+    if(r && parseInt(r.value) === q.ans) score++;
+  });
+
+  const payload = {
+    nombre,
+    email,
+    inicio: startTime.toLocaleString(),
+    envio: endTime.toLocaleString(),
+    cambios_pestana: tabSwitches,
+    nota: score + "/" + questions.length
+  };
+
+  await fetch("https://formspree.io/f/xaqvoaqj", {
+    method:"POST",
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify(payload)
+  });
+
+  localStorage.removeItem("examProgress");
+
+  alert("Enviado");
+};
 </script>
 
 </body>
