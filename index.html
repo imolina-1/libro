@@ -1,0 +1,184 @@
+
+<style>
+  .quiz-wrap { max-width: 660px; margin: 0 auto; padding: 1.5rem 0; font-size: 15px; color: var(--color-text-primary); }
+  .quiz-title { font-size: 20px; font-weight: 500; margin-bottom: 0.25rem; }
+  .quiz-sub { font-size: 13px; color: var(--color-text-secondary); margin-bottom: 2rem; }
+  .q-block { margin-bottom: 1.75rem; padding: 1rem 1.25rem; background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); }
+  .q-text { font-weight: 500; margin-bottom: 0.85rem; line-height: 1.5; }
+  .q-num { color: var(--color-text-secondary); font-weight: 400; margin-right: 4px; }
+  .opts { display: flex; flex-direction: column; gap: 6px; }
+  .opt { display: flex; align-items: flex-start; gap: 10px; padding: 8px 10px; border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-tertiary); cursor: pointer; transition: background 0.15s; font-size: 14px; line-height: 1.45; }
+  .opt:hover { background: var(--color-background-secondary); }
+  .opt input[type=radio] { margin-top: 2px; flex-shrink: 0; }
+  .opt.correct { background: #EAF3DE; border-color: #639922; color: #3B6D11; }
+  .opt.wrong { background: #FCEBEB; border-color: #E24B4A; color: #A32D2D; }
+  .opt.correct input, .opt.wrong input { accent-color: currentColor; }
+  .btn-submit { margin-top: 1.5rem; padding: 10px 28px; font-size: 15px; font-weight: 500; border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-md); background: var(--color-background-primary); color: var(--color-text-primary); cursor: pointer; }
+  .btn-submit:hover { background: var(--color-background-secondary); }
+  .result-box { margin-top: 1.5rem; padding: 1.25rem 1.5rem; border-radius: var(--border-radius-lg); border: 0.5px solid var(--color-border-tertiary); background: var(--color-background-secondary); }
+  .result-score { font-size: 28px; font-weight: 500; }
+  .result-label { font-size: 14px; color: var(--color-text-secondary); margin-top: 4px; }
+  .feedback { font-size: 13px; margin-top: 0.5rem; color: var(--color-text-secondary); }
+  .answered { pointer-events: none; }
+</style>
+
+<div class="quiz-wrap">
+  <h2 class="sr-only">Control de lectura: Entre tonos de gris</h2>
+  <p class="quiz-title">Control de lectura</p>
+  <p class="quiz-sub"><em>Entre tonos de gris</em> — Ruta Sepetys &nbsp;·&nbsp; 20 preguntas, una sola respuesta válida</p>
+  <div id="quiz"></div>
+  <button class="btn-submit" id="btn-submit">Corregir</button>
+  <div id="result-box" class="result-box" style="display:none;"></div>
+</div>
+
+<script>
+const questions = [
+  {
+    q: "¿En qué país vive Lina Vilkas al comienzo de la novela?",
+    opts: ["Polonia", "Letonia", "Lituania", "Estonia"],
+    ans: 2
+  },
+  {
+    q: "¿Cuántos años tiene Lina cuando comienza la historia?",
+    opts: ["14 años", "15 años", "16 años", "17 años"],
+    ans: 2
+  },
+  {
+    q: "¿Cuál es la ocupación del padre de Lina?",
+    opts: ["Médico", "Rector de universidad", "Militar", "Comerciante"],
+    ans: 1
+  },
+  {
+    q: "¿Qué talento especial posee Lina y que juega un papel importante en la novela?",
+    opts: ["Toca el piano", "Habla varios idiomas", "Dibuja y pinta", "Escribe poesía"],
+    ans: 2
+  },
+  {
+    q: "¿Quién llega a detener a la familia Vilkas en plena noche?",
+    opts: ["Soldados nazis", "Agentes del NKVD soviético", "Policías lituanos", "Milicias locales"],
+    ans: 1
+  },
+  {
+    q: "¿Cómo se llama el hermano menor de Lina?",
+    opts: ["Jonas", "Andrius", "Aleksas", "Petras"],
+    ans: 0
+  },
+  {
+    q: "¿A qué artista admira especialmente Lina y cuya obra intenta emular?",
+    opts: ["Picasso", "Edvard Munch", "Vincent van Gogh", "Salvador Dalí"],
+    ans: 2
+  },
+  {
+    q: "¿En qué tipo de transporte son trasladados los deportados durante la mayor parte del viaje?",
+    opts: ["Camiones militares", "Vagones de ganado del tren", "Barcos de carga", "Autobuses requisados"],
+    ans: 1
+  },
+  {
+    q: "¿Cómo se llama el joven lituano del que Lina se va enamorando a lo largo de la novela?",
+    opts: ["Jonas", "Aleksas", "Andrius", "Petras"],
+    ans: 2
+  },
+  {
+    q: "¿Qué sucede con el padre de Lina tras la detención familiar?",
+    opts: ["Escapa a Suecia", "Es enviado a una prisión diferente, separado de ellos", "Muere en el trayecto", "Es liberado por los soviéticos"],
+    ans: 1
+  },
+  {
+    q: "¿Cuál es la primera gran colonia en la que trabajan Lina y su familia al llegar a Siberia?",
+    opts: ["Una mina de carbón", "Una granja de remolacha azucarera", "Una fábrica de madera", "Un campo de trabajo cerca de Altái"],
+    ans: 1
+  },
+  {
+    q: "¿Qué enfermedad amenaza gravemente la vida del hermano de Lina durante el deportamiento?",
+    opts: ["Tuberculosis", "Tifus", "Escorbuto", "Neumonía"],
+    ans: 0
+  },
+  {
+    q: "¿Cuál es el papel del personaje conocido como 'el chico rubio' (el guardián soviético joven)?",
+    opts: ["Es el villano principal que tortura a los prisioneros", "Muestra cierta ambigüedad moral y en ocasiones ayuda a los deportados", "Es el comandante del campo", "Es un prisionero político como Lina"],
+    ans: 1
+  },
+  {
+    q: "¿Por qué los dibujos que hace Lina tienen tanta importancia estratégica en la novela?",
+    opts: ["Valen dinero para comprar comida", "Son un medio para enviar mensajes ocultos y documentar lo ocurrido", "Le permiten ganarse el favor de los guardias", "Sirven como prueba de su inocencia ante el NKVD"],
+    ans: 1
+  },
+  {
+    q: "¿Hacia dónde son trasladados finalmente Lina y los demás deportados en la parte final de la novela?",
+    opts: ["Un campo cerca del mar Caspio", "El Ártico, en la península de Yamal", "Las estepas de Kazajistán", "Siberia central, cerca del lago Baikal"],
+    ans: 1
+  },
+  {
+    q: "¿Qué objeto entierra Lina en el suelo ártico con la esperanza de que algún día sea encontrado?",
+    opts: ["Una carta dirigida a su padre", "Una caja con dibujos y un diario que documenta el deportamiento", "El retrato de su familia", "Un libro de poemas lituanos"],
+    ans: 1
+  },
+  {
+    q: "¿Cómo se llama la madre de Lina?",
+    opts: ["Elena", "Ona", "Marta", "Rasa"],
+    ans: 0
+  },
+  {
+    q: "¿Qué año describe el epílogo como el momento en que Lina puede finalmente contar su historia públicamente?",
+    opts: ["1953, tras la muerte de Stalin", "1972", "1989, con la caída del telón de acero", "1991, con la independencia de Lituania"],
+    ans: 3
+  },
+  {
+    q: "¿Cuál es el tema central que articula toda la novela?",
+    opts: ["La Segunda Guerra Mundial vista desde el frente alemán", "Las deportaciones estalinistas de los pueblos bálticos y la resistencia de la memoria", "La colaboración de los países bálticos con la Alemania nazi", "La vida cotidiana en la Unión Soviética durante los años 40"],
+    ans: 1
+  },
+  {
+    q: "¿Qué frase o idea resume mejor el mensaje final de la novela?",
+    opts: ["La violencia siempre triunfa sobre la bondad", "Recordar y testimoniar es una forma de resistencia y de supervivencia", "Solo la huida individual garantiza la salvación", "La historia la escriben los vencedores y no puede cambiarse"],
+    ans: 1
+  }
+];
+
+const container = document.getElementById('quiz');
+
+questions.forEach((q, i) => {
+  const block = document.createElement('div');
+  block.className = 'q-block';
+  block.id = 'q' + i;
+  let optsHtml = q.opts.map((o, j) => `
+    <label class="opt" id="opt-${i}-${j}">
+      <input type="radio" name="q${i}" value="${j}"> ${o}
+    </label>`).join('');
+  block.innerHTML = `<p class="q-text"><span class="q-num">${i+1}.</span>${q.q}</p><div class="opts">${optsHtml}</div>`;
+  container.appendChild(block);
+});
+
+document.getElementById('btn-submit').addEventListener('click', () => {
+  let score = 0;
+  let unanswered = 0;
+  questions.forEach((q, i) => {
+    const sel = document.querySelector(`input[name="q${i}"]:checked`);
+    if (!sel) { unanswered++; return; }
+    const chosen = parseInt(sel.value);
+    document.getElementById('q' + i).classList.add('answered');
+    q.opts.forEach((_, j) => {
+      const lbl = document.getElementById(`opt-${i}-${j}`);
+      if (j === q.ans) lbl.classList.add('correct');
+      else if (j === chosen && chosen !== q.ans) lbl.classList.add('wrong');
+    });
+    if (chosen === q.ans) score++;
+  });
+  if (unanswered > 0) {
+    alert(`Faltan ${unanswered} pregunta${unanswered>1?'s':''} por responder.`);
+    return;
+  }
+  document.getElementById('btn-submit').style.display = 'none';
+  const pct = Math.round(score / questions.length * 10 * 10) / 10;
+  let msg = '';
+  if (pct >= 9) msg = 'Lectura excelente.';
+  else if (pct >= 7) msg = 'Buena comprensión de la obra.';
+  else if (pct >= 5) msg = 'Lectura parcial o superficial.';
+  else msg = 'Muy probablemente no ha leído el libro.';
+  const box = document.getElementById('result-box');
+  box.style.display = 'block';
+  box.innerHTML = `<div class="result-score">${score} / ${questions.length}</div>
+    <div class="result-label">Nota orientativa: <strong>${pct.toFixed(1)}</strong> sobre 10</div>
+    <p class="feedback">${msg} Las respuestas correctas aparecen marcadas en verde.</p>`;
+});
+</script>
